@@ -1,6 +1,5 @@
 package ru.job4j.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +18,11 @@ public class Person {
     private String name;
     private String email;
     private String password;
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany
+    @JoinTable(name = "person_role",
+            joinColumns = {@JoinColumn(name = "person_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "role_id", nullable = false,
+                    updatable = false)}
+    )
     private Set<Role> roles;
 }
