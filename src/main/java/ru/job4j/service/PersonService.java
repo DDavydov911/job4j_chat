@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.job4j.model.Person;
 import ru.job4j.repository.PersonRepository;
+import ru.job4j.repository.UserStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +12,10 @@ import java.util.Optional;
 
 @Service
 public class PersonService {
-    private final PersonRepository repository;
+//    private final PersonRepository repository;
+    private final UserStore repository;
 
-    public PersonService(PersonRepository repository) {
+    public PersonService(UserStore repository) {
         this.repository = repository;
     }
 

@@ -11,6 +11,7 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
+    String name;
     @OneToMany
     List<Message> messages;
 }

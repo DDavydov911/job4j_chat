@@ -19,10 +19,15 @@ public class RoomController {
     }
 
     @GetMapping
+    public String findAll() {
+        return "This is a Room's page.";
+    }
+/**
+    @GetMapping
     public List<Room> findAll() {
         return rooms.findAll();
     }
-
+*/
     @PostMapping
     public ResponseEntity<Room> create(@RequestBody Room room) {
         return new ResponseEntity<>(rooms.save(room), HttpStatus.CREATED);
