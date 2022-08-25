@@ -3,6 +3,7 @@ package ru.job4j.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.model.Message;
 import ru.job4j.model.Room;
 import ru.job4j.service.RoomService;
@@ -30,15 +31,19 @@ public class RoomController {
 */
     @PostMapping
     public ResponseEntity<Room> create(@RequestBody Room room) {
+        if (room.getName() == null) {
+            throw new NullPointerException("Field name must not be emtpy");
+        }
         return new ResponseEntity<>(rooms.save(room), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Room> findById(@PathVariable int id) {
         var room = rooms.findById(id);
-        return new ResponseEntity<>(room.orElse(new Room()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+        if (room.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Room is not found");
+        }
+        return new ResponseEntity<>(room.get(), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
