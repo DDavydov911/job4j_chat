@@ -8,11 +8,11 @@ import ru.job4j.model.Message;
 import ru.job4j.model.Room;
 import ru.job4j.service.RoomService;
 
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
 
 @RestController
 @RequestMapping("/room")
-public class RoomController {
+public class RoomController implements MethMappingAble {
     private final RoomService rooms;
 
     public RoomController(RoomService rooms) {
@@ -23,12 +23,12 @@ public class RoomController {
     public String findAll() {
         return "This is a Room's page.";
     }
-/**
-    @GetMapping
-    public List<Room> findAll() {
-        return rooms.findAll();
-    }
-*/
+
+    /**
+     * @GetMapping public List<Room> findAll() {
+     * return rooms.findAll();
+     * }
+     */
     @PostMapping
     public ResponseEntity<Room> create(@RequestBody Room room) {
         if (room.getName() == null) {
@@ -50,6 +50,17 @@ public class RoomController {
     public ResponseEntity<Void> update(@RequestBody Room room) {
         this.rooms.save(room);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Room> patchRoom(@RequestBody Room room)
+            throws InvocationTargetException, IllegalAccessException {
+        Room roomDB = rooms.findById(room.getId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Room result = (Room) methodsMapping(room, roomDB);
+        return new ResponseEntity<>(
+                rooms.save(result), HttpStatus.OK
+        );
     }
 
     @DeleteMapping("/{id}")

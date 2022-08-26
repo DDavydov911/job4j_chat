@@ -14,13 +14,14 @@ import ru.job4j.service.PersonService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
 
 @RestController
 @RequestMapping("/person")
-public class PersonController {
+public class PersonController implements MethMappingAble {
     private final PersonService persons;
     private final BCryptPasswordEncoder encoder;
     private final ObjectMapper objectMapper;
@@ -31,12 +32,12 @@ public class PersonController {
         this.encoder = encoder;
         this.objectMapper = objectMapper;
     }
-/**
-    @GetMapping
-    public ResponseEntity getPersons() {
-        return ResponseEntity.ok("Сервер работает!");
-    }
-*/
+
+    /**
+     * @GetMapping public ResponseEntity getPersons() {
+     * return ResponseEntity.ok("Сервер работает!");
+     * }
+     */
     @GetMapping
     public List<Person> getPersons() {
         return persons.findAll();
@@ -78,6 +79,16 @@ public class PersonController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Person> patchPerson(@RequestBody Person person)
+            throws InvocationTargetException, IllegalAccessException {
+        Person personDB = persons.findById(person.getId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person is absent in DataBase")
+        );
+        Person result = (Person) methodsMapping(person, personDB);
+        return new ResponseEntity<>(persons.save(result), HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
         Person person = new Person();
@@ -86,15 +97,17 @@ public class PersonController {
         return ResponseEntity.ok().build();
     }
 
-    @ExceptionHandler(value = { IllegalArgumentException.class })
+    @ExceptionHandler(value = {IllegalArgumentException.class})
     public void suchNameExistsExceptionHandler(Exception e, HttpServletRequest request,
                                                HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() { {
-            put("message", e.getMessage());
-            put("type", e.getClass());
-        }}));
+        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() {
+            {
+                put("message", e.getMessage());
+                put("type", e.getClass());
+            }
+        }));
         LOGGER.error(e.getLocalizedMessage());
     }
 }
